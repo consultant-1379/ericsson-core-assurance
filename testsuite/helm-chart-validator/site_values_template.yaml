@@ -1,0 +1,170 @@
+global:
+  hosts:
+    so: "so.dummy.hostname.com"
+    iam: "iam.dummy.hostname.com"
+    vnfm: "vnfm.dummy.hostname.com"
+    pf: "pf.dummy.hostname.com"
+    uds: "uds.dummy.hostname.com"
+    gr: "gr.dummy.hostname.com"
+    gas: "gas.dummy.hostname.com"
+    aviz: "av.dummy.hostname.com"
+  registry:
+    url: armdocker.rnd.ericsson.se
+    username: "admin"
+    password: "ericsson"
+  support:
+    ipv6:
+      enabled: true
+  timezone: UTC
+  createClusterRoles: true
+  ingress:
+    baseHostname: "dummy.hostname.com"
+    ingressClass: "oss_iccr"
+  ingressClass: "oss_iccr"
+  iccrAppIngresses: true
+  networkPolicy:
+    enabled: false
+
+tolerations:
+  - key: node.kubernetes.io/not-ready
+    operator: Exists
+    effect: NoExecute
+    tolerationSeconds: 0
+  - key: node.kubernetes.io/unreachable
+    operator: Exists
+    effect: NoExecute
+    tolerationSeconds: 0
+
+system-user:
+  credentials:
+    username: "system-user"
+    password: "Ericsson123!"
+
+tags:
+  eoEvnfm: true
+  eoVmvnfm: true
+  eoSo: true
+  eoPf: true
+  eoUds: true
+
+eric-data-object-storage-mn:
+  persistentVolumeClaim:
+    size: 10Gi
+
+eric-tm-ingress-controller-cr:
+  service:
+    loadBalancerIP: "127.0.0.1"
+    externalTrafficPolicy: "Local"
+  ingressClass: "eo_iccr"
+
+eric-sec-access-mgmt:
+  ingress:
+    hostname: "keycloak.dummy.hostname.com"
+  replicaCount: 2
+
+eric-eo-evnfm:
+  eric-lcm-container-registry:
+    ingress:
+      hostname: "registry.vnfm.dummy.hostname.com"
+    persistence:
+      persistentVolumeClaim:
+        size: "450Gi"
+  eric-lcm-helm-chart-registry:
+    ingress:
+      enabled: false
+      hostname: "helmregistry.vnfm.dummy.hostname.com"
+    env:
+      secret:
+        BASIC_AUTH_USER:
+        BASIC_AUTH_PASS:
+  eric-vnfm-orchestrator-service:
+    oss:
+      topology:
+        secretName: null
+    smallstack:
+      application: true
+
+eric-eo-evnfm-nbi:
+  eric-evnfm-rbac:
+    defaultUser:
+      username: "vnfm"
+      password: "vnfm"
+
+eric-oss-uds:
+  defaultUser:
+    username: "uds"
+    password: "uds"
+
+eric-eo-evnfm-vm:
+  eric-vm-vnfm-migration:
+    migration:
+      enabled: true
+  eric-vnflcm-service:
+    oss:
+      secretName: null
+    persistentVolumeClaim:
+      size: 20Gi
+    service:
+      enabled: true
+      loadBalancerIP: "131.161.25.23"
+      externalTrafficPolicy: "Local"
+
+eric-eo-so:
+  defaultUser:
+    username: "so-user"
+    password: "Ericsson123!"
+
+eric-oss-pf:
+  defaultUser:
+    username: "pf-user"
+    password: "Ericsson123!"
+
+gas:
+  defaultUser:
+    username: "gas-user"
+    password: "Ericsson123!"
+
+eric-ctrl-bro:
+  persistence:
+    persistentVolumeClaim:
+      size: "20Gi"
+  sftp:
+    username: "dummy"
+    password: "dummy"
+
+eric-data-search-engine:
+  service:
+    network:
+      protocol:
+        IPv6: true
+
+geo-redundancy:
+  enabled: true
+eric-gr-bur-orchestrator:
+  credentials:
+    username: "dummy"
+    password: "dummy"
+  gr:
+    bro:
+      autoDelete:
+        backupsLimit: 10
+    sftp:
+      url: "dummy:22/path/"
+      username: "dummy"
+      password: "dummy"
+    cluster:
+      role: "PRIMARY"
+      secondary_hostnames:
+        - "dummy"
+    registry:
+      secondarySiteContainerRegistryHostname: dummy
+
+service-mesh-egress-gateway:
+  log:
+    streamingMethod: "indirect"
+eric-mesh-gateways:
+  log:
+    streamingMethod: "indirect"
+eric-bos-neo4j-graphdb:
+  log:
+    streamingMethod: "indirect"

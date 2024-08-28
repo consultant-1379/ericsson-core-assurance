@@ -1,0 +1,96 @@
+# # This file is used to declare the external dependencies of this application.
+# # It can be used to enable services in other charts within the overall product.
+# # This includes services in the adp base, the oss common base as well as other applications.
+optionality:
+  eric-cloud-native-base:
+    eric-cm-mediator:
+      enabled: false
+    eric-fh-snmp-alarm-provider:
+      enabled: false
+    eric-data-document-database-pg:
+      enabled: false
+    eric-fh-alarm-handler-db-pg:
+      enabled: false
+    eric-sec-access-mgmt-db-pg:
+      enabled: true
+    eric-lm-combined-server-db-pg:
+      enabled: false
+    eric-pm-server:
+      enabled: true
+    eric-data-message-bus-kf:
+      enabled: true
+    eric-data-coordinator-zk:
+      enabled: true
+    eric-sec-key-management:
+      enabled: false
+    eric-fh-alarm-handler:
+      enabled: false
+    eric-sec-access-mgmt:
+      enabled: true
+    eric-sec-sip-tls:
+      enabled: false
+    eric-odca-diagnostic-data-collector:
+      enabled: false
+    eric-data-distributed-coordinator-ed:
+      enabled: false
+    eric-sec-certm:
+      enabled: false
+    eric-ctrl-bro:
+      enabled: true
+    eric-lm-combined-server:
+      enabled: false
+    eric-data-search-engine:
+      enabled: true
+    eric-data-search-engine-curator:
+      enabled: true
+    eric-log-transformer:
+      enabled: true
+    eric-log-shipper:
+      enabled: true
+    eric-data-object-storage-mn:
+      enabled: false
+    eric-dst-agent:
+      enabled: false
+    eric-dst-collector:
+      enabled: false
+    eric-tm-ingress-controller-cr:
+      enabled: true
+  eric-oss-common-base:
+    eric-eo-api-gateway:
+      enabled: false
+    eric-data-visualizer-kb:
+      enabled: true
+    eric-eo-usermgmt:
+      enabled: true
+    eric-eo-usermgmt-ui:
+      enabled: true
+    eric-eo-common-br-agent:
+      enabled: false
+    eric-oss-common-postgres:
+      enabled: true
+    eric-adp-gui-aggregator-service:
+      enabled: true
+    eric-oss-notification-service:
+      enabled: false
+    eric-oss-notification-service-database-pg:
+      enabled: false
+    eric-eo-eai:
+      enabled: false
+    eric-eo-eai-database-pg:
+      enabled: false
+    eric-oss-dmaap:
+      enabled: false
+    eric-eo-subsystem-management:
+      enabled: false
+    eric-eo-subsystem-management-database-pg:
+      enabled: false
+    eric-eo-subsystemsmgmt-ui:
+      enabled: false
+    eric-eo-credential-manager:
+      enabled: false
+    eric-eo-onboarding:
+      enabled: false
+    eric-eo-ecmsol005-adapter:
+      enabled: false
+    eric-dst-query:
+      enabled: false

@@ -1,0 +1,11 @@
+modelVersion: 2.0
+
+properties:
+    # Microservice Helm Chart / Docker Image name
+  - helm-chart-docker-image-name: eric-service-assurance
+    # Gerrit Repo full name
+  - gerrit-repo-name: OSS/com.ericsson.oss.air/ericsson-core-assurance
+    # Project ArtifactID
+  - project-artifact-id: ericsson-service-assurance
+    # Image product number
+  - image-product-number: CXC90001

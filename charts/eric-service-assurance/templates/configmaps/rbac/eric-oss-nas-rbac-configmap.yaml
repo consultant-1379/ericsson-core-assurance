@@ -1,0 +1,53 @@
+{{- $prefix := index .Values "eric-oss-network-assurance-search" "frontendRoutePrefix" -}}
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "eric-service-assurance.name" . }}-nas-rbac-proxy
+  labels:
+    {{- include "eric-service-assurance.labels" . | nindent 4 }}
+    com.ericsson.bss/bam-global-rbac: {{ .Values.rbac.label }}
+  annotations:
+    {{- include "eric-service-assurance.helm-annotations" . | nindent 4 }}
+data:
+  rbac: |
+    policy:
+      role-0:
+        PType: g
+        V0: ericsson-system-security-admin
+        V1: {{ .Values.createAssuranceRole.roleName }}
+      role-1:
+        PType: p
+        V0: {{ .Values.createAssuranceRole.roleName }}
+        V1: /ui*
+        V2: get
+      role-2:
+        PType: p
+        V0: {{ .Values.createAssuranceRole.roleName }}
+        V1: /metadata/indexes
+        V2: get
+      role-3:
+        PType: p
+        V0: {{ .Values.createAssuranceRole.roleName }}
+        V1: /assurance*/metadata/*
+        V2: get
+      role-4:
+        PType: p
+        V0: {{ .Values.createAssuranceRole.roleName }}
+        V1: /assurance*/search/*
+        V2: get
+      role-5:
+        PType: p
+        V0: {{ .Values.createAssuranceRole.roleName }}
+        V1: /cnom*
+        V2: get
+      role-6:
+        PType: p
+        V0: {{ .Values.createAssuranceRole.roleName }}
+        V1: {{ $prefix }}/*
+        V2: get
+      role-7:
+        PType: p
+        V0: {{ .Values.createAssuranceRole.roleName }}
+        V1: /system/*
+        V2: get

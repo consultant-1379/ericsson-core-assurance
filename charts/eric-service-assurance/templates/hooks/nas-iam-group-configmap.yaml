@@ -1,0 +1,20 @@
+{{- if .Values.createAssuranceRole.enabled -}}
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: {{ template "eric-service-assurance.name" . }}-group-configmap
+  annotations:
+  {{- include "eric-service-assurance.helm-annotations" .| nindent 4 }}
+  labels:
+    {{- include "eric-service-assurance.labels" .| nindent 4 }}
+data:
+  group.json: |
+    {
+      "name": "{{ .Values.createAssuranceRole.roleName }}",
+      "path": "/{{ .Values.createAssuranceRole.roleName }}",
+      "attributes": {},
+      "realmRoles": [],
+      "clientRoles": {},
+      "subGroups": []
+    }
+{{- end -}}

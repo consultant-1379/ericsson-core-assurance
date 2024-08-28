@@ -1,0 +1,25 @@
+global:
+  hosts:
+    iam: "iam.ericsson.com"
+    aviz: "av.ericsson.com"
+  registry:
+    url: 
+    username: dummy
+    password: dummy
+  security:
+    tls:
+      enabled: false
+
+defaultUser:
+  username: dummy
+  password: dummy
+
+service-mesh-egress-gateway:
+  log:
+    streamingMethod: "indirect"
+eric-mesh-gateways:
+  log:
+    streamingMethod: "indirect"
+eric-bos-neo4j-graphdb:
+  log:
+    streamingMethod: "indirect"

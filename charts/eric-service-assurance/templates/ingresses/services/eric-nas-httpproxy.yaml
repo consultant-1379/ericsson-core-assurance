@@ -1,0 +1,53 @@
+{{- $tls := include "eric-service-assurance.global-security-tls-enabled" .  -}}
+{{- $prefix := index .Values "eric-oss-network-assurance-search" "frontendRoutePrefix" -}}
+{{- if .Values.ingress.iccr.enabled -}}
+apiVersion: projectcontour.io/v1
+kind: HTTPProxy
+metadata:
+  name: {{ template "eric-service-assurance.name" . }}-httpproxy
+  annotations:
+    {{- include "eric-service-assurance.helm-annotations" .| nindent 4 }}
+    kubernetes.io/ingress.class: {{ template "eric-service-assurance.ingressClass" . }}
+  labels:
+    {{- include "eric-service-assurance.labels" .| nindent 4 }}
+spec:
+  routes:
+  - conditions:
+    - prefix: /cnom/
+    pathRewritePolicy:
+      replacePrefix:
+        - prefix: /cnom/
+          replacement: /log/viewer/
+    services:
+    - name: {{ index .Values "eric-cnom-server-rbac-proxy" "nameOverride" }}
+      port: 9443
+      {{- if eq "true" $tls }}
+      protocol: tls
+      validation:
+        caSecret: {{ .Values.ingress.tls.caSecret }}
+        subjectName: {{ index .Values "eric-cnom-server-rbac-proxy" "nameOverride" }}
+      {{- end }}
+    timeoutPolicy:
+      response: "300s"
+    rateLimitPolicy:
+    {{- toYaml .Values.ingress.rateLimitPolicy | nindent 6 }}
+  - conditions:
+    - prefix: {{ $prefix }}
+    pathRewritePolicy:
+      replacePrefix:
+        - prefix: {{ $prefix }}
+          replacement: /
+    services:
+    - name: {{ index .Values "eric-oss-network-assurance-search-rbac-proxy" "nameOverride" }}
+      port: 9443
+      {{- if eq "true" $tls }}
+      protocol: tls
+      validation:
+        caSecret: {{ .Values.ingress.tls.caSecret }}
+        subjectName: {{ index .Values "eric-oss-network-assurance-search-rbac-proxy" "nameOverride" }}
+      {{- end }}
+    timeoutPolicy:
+      response: "300s"
+    rateLimitPolicy:
+    {{- toYaml .Values.ingress.rateLimitPolicy | nindent 6 }}
+{{- end }}

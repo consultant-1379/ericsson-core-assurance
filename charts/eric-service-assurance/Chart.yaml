@@ -1,0 +1,42 @@
+apiVersion: v2
+dependencies:
+- name: eric-oss-core-slice-assurance-cfg
+  repository: https://arm.seli.gic.ericsson.se/artifactory/proj-eric-oss-drop-helm
+  version: 1.345.0-1
+- name: eric-oss-core-reporting-dimension-query
+  repository: https://arm.seli.gic.ericsson.se/artifactory/proj-bos-assurance-released-helm
+  version: 3.63.0+1
+- name: eric-oss-assurance-augmentation
+  repository: https://arm.seli.gic.ericsson.se/artifactory/proj-eric-oss-drop-helm-local
+  version: 1.293.0-1
+- name: eric-oss-network-assurance-search
+  repository: https://arm.seli.gic.ericsson.se/artifactory/proj-eric-oss-drop-helm
+  version: 1.59.0-1
+- name: eric-oss-assurance-indexer
+  repository: https://arm.seli.gic.ericsson.se/artifactory/proj-eric-oss-drop-helm-local
+  version: 1.211.0-1
+- name: eric-bos-assurance-topology-notification
+  repository: https://arm.seli.gic.ericsson.se/artifactory/proj-bos-assurance-released-helm/
+  version: 1.108.0+1
+- name: eric-bos-neo4j-graphdb
+  repository: https://arm.seli.gic.ericsson.se/artifactory/proj-bos-assurance-released-helm
+  version: 1.38.0+2
+- condition: eric-log-shipper.enabled
+  import-values:
+  - child: logShipper.config
+    parent: global.logShipper.config
+  name: eric-log-shipper
+  repository: https://arm.sero.gic.ericsson.se/artifactory/proj-adp-gs-all-helm/
+  version: 19.5.0+8
+- alias: eric-oss-network-assurance-search-rbac-proxy
+  name: eric-bss-kube-rbac-proxy
+  repository: https://arm.epk.ericsson.se/artifactory/proj-bam-released-helm/
+  version: 1.39.0+7
+- alias: service-mesh-egress-gateway
+  condition: service-mesh-egress-gateway.enabled
+  name: eric-mesh-gateways
+  repository: https://arm.sero.gic.ericsson.se/artifactory/proj-adp-gs-all-helm
+  version: 13.0.0+50
+description: Integration Helm chart for Ericsson Service Assurance Application
+name: eric-service-assurance
+version: 1.6.0-48

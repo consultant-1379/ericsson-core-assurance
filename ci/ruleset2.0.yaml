@@ -1,0 +1,153 @@
+
+# COPYRIGHT Ericsson 2024
+#
+#
+#
+# The copyright to the computer program(s) herein is the property of
+#
+# Ericsson Inc. The programs may be used and/or copied only with written
+#
+# permission from Ericsson Inc. or in accordance with the terms and
+#
+# conditions stipulated in the agreement/contract under which the
+#
+# program(s) have been supplied.
+#
+
+modelVersion: 2.0
+
+description: "Service Assurance App Staging: Bob ruleset"
+
+import:
+  common: ../common-properties.yaml
+
+docker-images:
+  - adp-release-auto: armdocker.rnd.ericsson.se/proj-adp-cicd-drop/bob-adp-release-auto:latest
+  - adp-inca: armdocker.rnd.ericsson.se/proj-adp-cicd-drop/adp-int-helm-chart-auto:latest
+  - adp-helm-dr-check: armdocker.rnd.ericsson.se/proj-adp-cicd-drop/adp-helm-dr-checker:latest
+  - deprek8ion: armdocker.rnd.ericsson.se/proj-ecm-gcr/swade1987/deprek8ion:1.1.41
+
+properties:
+  - app-name: ${common.helm-chart-docker-image-name}
+  - site-values-file: ${testsuite-dir}/site_values_template.yaml
+  - testsuite-dir: testsuite/helm-chart-validator
+  - chart-dir: charts/${app-name}
+  - testsuite-image-name: armdocker.rnd.ericsson.se/proj-ticketmaster/oss-helm-checks:v6.0.0
+  - k8s-checkers-dir: ci/kubernetes_range_checkers
+env:
+  - HOME
+  - PWD
+  - GERRIT_USERNAME
+  - GERRIT_PASSWORD
+  - HELM_REPO_CREDENTIALS
+  - KUBECONFORM_KINDS_TO_SKIP
+  - DESIGN_RULE_OPTIONS (default="")
+  - CI_HELM (default="true")
+
+var:
+  - chart-version
+rules:
+  # Integrated rule to execute everything locally (init-dev)
+  release:
+    - rule: clean
+  # Clean workspace
+  clean:
+    - task: rm
+      cmd:
+        - rm -rf .bob/
+        - rm -rf build/
+        - rm -rf .pytest_cache/ || true
+
+  helm-package-pcr:
+    - task: get-chart-version
+      cmd: tail -1 ${chart-dir}/Chart.yaml | grep "version:" | awk '{print $2}' > .bob/var.chart-version
+    - task: package
+      docker-image: adp-inca
+      docker-flags:
+      - --env HELM_REPO_CREDENTIALS
+      - --env CI_HELM
+      cmd: ihc-package --version ${var.chart-version} --output . --helm-credentials ${env.HELM_REPO_CREDENTIALS} --folder ${chart-dir}
+
+  run-chart-testsuite:
+    - task: create-test-folder
+      cmd: mkdir ${env.PWD}/test-files
+    - task: copy-chart-to-test-folder
+      cmd: cp ${app-name}-${var.chart-version}.tgz ${env.PWD}/test-files/test_chart.tgz
+    - task: copy-site-values-to-test-folder
+      cmd: cp ${site-values-file} ${env.PWD}/test-files/site_values_template.yaml
+    - task: run-testsuite
+      cmd: docker run --name application-testsuite -v ${env.PWD}/test-files:/test-files ${testsuite-image-name}
+
+  test-suite-report-and-clean:
+    - task: get-test-report
+      cmd: docker cp application-testsuite:/testsuite/report.html chart-test-report.html
+    - task: clean-container
+      cmd: docker rm -f application-testsuite
+
+  set-design-rule-parameters:
+    - task: generate-design-rule-parameters
+      cmd: bash -c 'echo ".bob/${app-name}_tmp/${app-name}" > .bob/var.helm-chart-directory;'
+
+  design-rule-checker:
+    - task: helm-dr-checker
+      docker-image: adp-helm-dr-check
+      cmd: helm-dr-check
+        --helm-chart ${chart-dir}
+        --values-file ${site-values-file}
+        --log-level WARN
+        -Dhelmdrck.credential.file.path=${env.HELM_REPO_CREDENTIALS}
+        -DhelmDesignRule.config.DR-D1120-045=skip
+        -DhelmDesignRule.config.DR-D1121-067=skip
+        -DhelmDesignRule.config.DR-D1121-146=skip
+        -DhelmDesignRule.config.DR-D1121-060=skip
+        -DhelmDesignRule.config.DR-D1123-113=skip
+        -DhelmDesignRule.config.DR-D1126-010=skip
+        -DhelmDesignRule.config.DR-D1123-134=disable
+        -DhelmDesignRule.config.eric-bss-kube-rbac-proxy.DR-D1125-014=skip
+        -DhelmDesignRule.config.eric-bss-kube-rbac-proxy.DR-D1125-052=skip
+        -DhelmDesignRule.config.eric-bss-kube-rbac-proxy.DR-D1125-054=skip
+        -DhelmDesignRule.config.DR-D470217-001=skip
+        -DhelmDesignRule.config.DR-D1120-057=skip
+        -DhelmDesignRule.config.DR-D1120-061=skip
+        -DhelmDesignRule.config.DR-D1121-065=skip
+        -DhelmDesignRule.config.DR-D1123-133=skip
+        -DhelmDesignRule.config.eric-bos-assurance-topology-notification.DR-D1126-005=skip
+        -DhelmDesignRule.config.eric-bos-assurance-topology-notification.DR-D1120-060=skip
+         ${env.DESIGN_RULE_OPTIONS}
+
+  run-kubernetes-compatibility-tests:
+    - task: get-chart-version
+      cmd: tail -1 ${chart-dir}/Chart.yaml | grep "version:" | awk '{print $2}' > .bob/var.chart-version
+
+    - task: chmod-execute-support-kubernetes-versions
+      cmd: chmod +x ${k8s-checkers-dir}/print_supported_k8s_versions.sh
+
+    - task: chmod-execute-generate-helm-templates
+      cmd: chmod +x ${k8s-checkers-dir}/generate_helm_templates_for_supported_k8s.sh
+
+    - task: chmod-execute-kubeconform
+      cmd: chmod +x ${k8s-checkers-dir}/kubeconform.sh
+
+    - task: chmod-execute-deprek8ion
+      cmd: chmod +x ${k8s-checkers-dir}/deprek8ion.sh
+
+    - task: generate-supported-kubernetes-versions
+      docker-image: adp-release-auto
+      cmd: ${k8s-checkers-dir}/print_supported_k8s_versions.sh ${chart-dir}/kubeVersion.yaml > .bob/var.supported-k8s-versions
+
+    - task: generate-manifests-for-kubernetes-versions
+      docker-image: adp-inca
+      docker-flags:
+        - "--env GERRIT_USERNAME"
+        - "--env GERRIT_PASSWORD"
+      cmd: ${k8s-checkers-dir}/generate_helm_templates_for_supported_k8s.sh ${app-name}-${var.chart-version}.tgz ${site-values-file} ".bob/var.supported-k8s-versions" ".bob/helm-templates"
+
+    - task: run-kubeconform
+      docker-image: adp-helm-dr-check
+      cmd: ${k8s-checkers-dir}/kubeconform.sh ${env.PWD}/.bob/var.supported-k8s-versions ${env.PWD}/.bob/helm-templates "${env.KUBECONFORM_KINDS_TO_SKIP}"
+
+    - task: run-deprek8ion
+      docker-image: deprek8ion
+      docker-flags:
+        - "--entrypoint ${k8s-checkers-dir}/deprek8ion.sh"
+      cmd: .bob/var.supported-k8s-versions .bob/helm-templates

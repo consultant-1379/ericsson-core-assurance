@@ -1,0 +1,13 @@
+# # This file is explained in docs/eric-product-info.md file.
+# # The below image is used for the Network Policy within this chart, if you plan to remove the Network Policy, this image reference will not be needed
+productName: ericsson-service-assurance
+productNumber: CXD90001
+
+images:
+  eric-esoa-iam-client:
+    productName: "ESOA IAM client IMAGE"
+    productNumber: "CXU 000 0000"
+    registry: "armdocker.rnd.ericsson.se"
+    repoPath: "proj-esoa-so"
+    name: eric-esoa-iam-client
+    tag: "1.0.0-18"

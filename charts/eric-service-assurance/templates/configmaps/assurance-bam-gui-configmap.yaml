@@ -1,0 +1,41 @@
+{{- $prefix := index .Values "eric-oss-network-assurance-search" "frontendRoutePrefix" -}}
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ template "eric-service-assurance.name" . }}-gui-bam-config
+  labels:
+    {{- include "eric-service-assurance.labels" . | nindent 4 }}
+  annotations:
+    {{- include "eric-service-assurance.helm-annotations" . | nindent 4 }}
+data:
+  config.json: |-
+    {
+        "version": "1.0.0",
+        "apps": [
+            {
+                "name": "serviceAssurance",
+                "displayName": "Service Assurance",
+                "version": "0.1.0",
+                "type": "external",
+                "url": "{{ $prefix }}/ui/#service-assurance-dashboard",
+                "priority": 15,
+                "groupNames": [
+                    "esoaOperations"
+                ],
+                "tags": ["esoa"]
+            }
+        ],
+        "groups": [
+            {
+                "name": "esoaOperations",
+                "displayName": "ESOA Operations",
+                "version": "0.1.0",
+                "type": "domain",
+                "priority": -999,
+                "tags": ["esoa"]
+            }
+        ],
+        "components": [
+        ]
+    }

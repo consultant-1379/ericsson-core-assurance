@@ -1,0 +1,21 @@
+# # The explanation of role-binding file is described in /docs/role.md
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: {{ template "eric-service-assurance.name" . }}-gas-patcher-policy
+  labels:
+    {{- include "eric-service-assurance.labels" .| nindent 4 }}
+  annotations:
+    {{- include "eric-service-assurance.helm-annotations" .| nindent 4 }}
+rules:
+  # Rule to allow GAS hook to patch its ext app configmap
+  - apiGroups:
+      - ""  # "" indicates the core API group
+    resources:
+      - configmaps
+    verbs:
+      - get
+      - list
+      - patch
+      - create
+      - delete

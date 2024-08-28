@@ -1,0 +1,1 @@
+# General information about on how to test script

@@ -1,0 +1,28 @@
+{{- $serviceMesh := include "eric-service-assurance.service-mesh-enabled" . | trim -}}
+{{- $tls := include "eric-service-assurance.global-security-tls-enabled" . | trim -}}
+{{- if and (eq $serviceMesh "true") (eq $tls "true") }}
+apiVersion: networking.istio.io/v1beta1
+kind: DestinationRule
+metadata:
+  name: {{ include "eric-service-assurance.name" . }}-eric-oss-core-slice-assurance-cfg-destinationrule
+  annotations:
+  {{- include "eric-service-assurance.helm-annotations" . | nindent 4 }}
+  labels:
+  {{- include "eric-service-assurance.labels" . | nindent 4 }}
+spec:
+  exportTo:
+  - "."
+  host: {{ .Values.global.dependentServices.csac.host }}
+  trafficPolicy:
+    portLevelSettings:
+      - port:
+          number: {{ .Values.global.dependentServices.csac.port }}
+        tls:
+          mode: MUTUAL
+          clientCertificate: /etc/istio/tls/eric-oss-core-slice-assurance-cfg/cert.pem
+          privateKey: /etc/istio/tls/eric-oss-core-slice-assurance-cfg/key.pem
+          caCertificates: /etc/istio/tls-ca/cacertbundle.pem
+  workloadSelector:
+    matchLabels:
+      eric-oss-core-slice-assurance-cfg-ism-access: "true"
+{{- end }}

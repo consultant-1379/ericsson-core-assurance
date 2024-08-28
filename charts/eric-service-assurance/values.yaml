@@ -1,0 +1,210 @@
+# # Default values for oss-integration-chart-chassis.
+# # This is a YAML-formatted file.
+# # Declare variables to be passed into your templates.
+labels: {}
+annotations: {}
+nameOverride: ""
+
+global:
+  createSchema: true
+  createDB: false
+  ingress:
+    baseHostname: ""
+    ingressClass: "oss_iccr"
+  registry:
+    url: armdocker.rnd.ericsson.se
+    imagePullPolicy: "IfNotPresent"
+  pullSecret: "k8s-registry-secret"
+  networkPolicy:
+    enabled: true
+  ingressClass: "oss_iccr"
+  log:
+    streamingMethod: "direct"
+  security:
+    tls:
+      enabled: false
+  serviceMesh:
+    enabled: false
+  logShipper:
+    deployment:
+      type: "sidecar"
+  iam:
+    adminSecret: eric-sec-access-mgmt-creds
+    userKey: kcadminid
+    passwordKey: kcpasswd
+    cacert:
+      secretName: eric-bss-bam-oam-external-server-cert
+      key: tls.crt
+      filePath: iam/ca.crt
+  dependentServices:
+    csac:
+      host: eric-oss-core-slice-assurance-cfg
+      port: 8443
+
+
+minReadySeconds: 0
+terminationGracePeriodSeconds: 30
+topologySpreadConstraints: []
+tolerations: []
+
+createAssuranceRole:
+  enabled: true
+  roleName: assurance-user
+
+service:
+  port: 80
+
+apiGateway:
+  hostname: eric-eo-api-gateway
+
+ingress:
+  enabled: true
+  iccr:
+    enabled: true
+  ingressClass:
+  fqdnPrefix: aviz
+  tls:
+    enabled: true
+    secretName: iam-tls-secret
+    passthrough: false
+    caSecret: eric-sec-sip-tls-trusted-root-cert
+  allowOriginHosts: {}
+  rateLimitPolicy:
+    local:
+      requests: 500
+      unit: second
+rbac:
+  label: &rbacLabel oam-rbac
+
+eric-oss-core-slice-assurance-cfg:
+  database:
+    host: edb-so-dr-assurance-rw
+    port: 5432
+    connectRetries: 9
+    dictSchema: dict
+    rtSchema: rtds
+    sslMode: verify-ca
+    serverCertSecret: edb-so-dr-assurance-ca
+    serverCertKey: ca.crt
+    # Client certs will need to be re-added once mTLS is supported for CN EDB
+    connectionTimeout: 60000
+    userKey: custom-user
+    passwdKey: custom-pwd
+    dbaUserKey: super-user
+    dbaPasswdKey: super-pwd
+    dbName: app
+    secret: edb-users-secret
+  csac:
+    resource:
+      # Default files as specified for GA: All RAN Kpis and only Simple Core Kpis
+      oob:
+        - 'csac-ran-oob-kpi-defs.json'
+        - 'Partial-DRB-Accessibility.json'
+        - 'csac-core-oob-kpi-2.1.0-SimpleCoreKPIs.json'
+  provisioning:
+    aas:
+      enabled: true
+      url: "http://eric-oss-assurance-augmentation:8080"
+      ardq:
+        cardq: http://eric-oss-core-reporting-dimension-query:8080
+    index:
+      enabled: true
+      url: "http://eric-oss-assurance-indexer:8080"
+    pmsc:
+      enabled: true
+      url: "http://eric-oss-pm-stats-calculator:8080"
+
+eric-oss-core-reporting-dimension-query:
+  cts:
+    enabled: false
+    tls:
+      enabled: false
+  neo4j:
+    enabled: true
+
+eric-oss-assurance-augmentation:
+  database:
+    host: edb-so-dr-assurance-rw
+    port: 5432
+    connectRetries: 9
+    secret: edb-users-secret
+    sslMode: verify-ca
+    serverCertSecret: edb-so-dr-assurance-ca
+    serverCertKey: ca.crt
+    # Client certs will need to be re-added once mTLS is supported for CN EDB
+    connectionTimeout: 60000
+    userKey: custom-user
+    passwdKey: custom-pwd
+    dbaUserKey: super-user
+    dbaPasswdKey: super-pwd
+    dbName: app
+    schemaName: aug
+
+eric-bos-assurance-topology-notification:
+  kafka:
+    topics:
+      input:
+        name: cts-topology-change-events
+    bootstrapServer:
+      host: eric-esoa-platform-message-bus-kf-client
+  neo4j:
+    output:
+      enabled: true
+
+
+eric-oss-network-assurance-search:
+  frontendRoutePrefix: "/service-assurance"
+
+eric-oss-network-assurance-search-rbac-proxy:
+  nameOverride: "eric-oss-network-assurance-search-rbac-proxy"
+  config:
+    logOutput:
+      - stdout
+    oidcAuth:
+      enabled: true
+      caSecret: eric-bss-bam-oam-oidc-ca-bundle
+      clientId: AuthorizationClient
+      # Issuer Url will IAM master realms url
+      # eg:- https://<IAM-FQDN>/auth/realms/master
+      issuerUrl: ""
+      # Authentication Proxy Login Endpoint URL, use BAM GUI FQDN for Authn proxy FQDN, because Authn proxy ingress is embeded in BAM GUI ingress.
+      # eg:- https://<BAM-GUI-FQDN>/sec/authn/v1/login?origin=
+      authnProxyLoginURL: ""
+    # NAS full service URL
+    upstream:
+      # Adding space to issuerRef parameter to set empty value to issuer.reference in final Upstream client certificate template to generate NAS client certificates using SIP-TLS trusted root CA as issuer
+      issuerRef: eric-bos-esoa-common-client-ca
+      noTlsUrl: http://eric-oss-network-assurance-search:3000
+      url: https://eric-oss-network-assurance-search:3443
+    rbac:
+      globalRolePolicyCmLabel: *rbacLabel
+  ingress:
+    # Disabling the RBAC Ingress and using NAS Ingress to access RBAC for securing NAS
+    enabled: false
+
+eric-cnom-server-rbac-proxy:
+  nameOverride: "eric-cnom-server-rbac-proxy"
+
+eric-log-shipper:
+  enabled: true
+
+# always should be disabled until ESOA-10770 is resolved
+service-mesh-egress-gateway:
+  enabled: false
+  gatewayType: egress
+  autoScaling:
+    enabled: false
+  service:
+    type: ClusterIP
+
+imageCredentials:
+  repoPath: # overrides repoPath from eric-product-info.yaml
+  pullPolicy: IfNotPresent
+  registry:
+    imagePullPolicy: # overrides global image pull policy
+    url: # overrides registry url from global & eric-product-info.yaml
+  eric-esoa-iam-client:
+    registry:
+      url:
+      imagePullPolicy: IfNotPresent
+    repoPath:

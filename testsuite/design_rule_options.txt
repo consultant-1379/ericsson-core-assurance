@@ -1,0 +1,17 @@
+-DhelmDesignRule.config.DR-D1120-045=skip
+-DhelmDesignRule.config.DR-D1121-146=skip
+-DhelmDesignRule.config.DR-D1121-060=skip
+-DhelmDesignRule.config.DR-D1123-113=skip
+-DhelmDesignRule.config.DR-D1126-010=skip
+-DhelmDesignRule.config.DR-D1123-134=disable
+-DhelmDesignRule.config.DR-D1121-067=skip
+-DhelmDesignRule.config.eric-bss-kube-rbac-proxy.DR-D1125-014=skip
+-DhelmDesignRule.config.eric-bss-kube-rbac-proxy.DR-D1125-052=skip
+-DhelmDesignRule.config.eric-bss-kube-rbac-proxy.DR-D1125-054=skip
+-DhelmDesignRule.config.DR-D470217-001=skip
+-DhelmDesignRule.config.DR-D1120-057=skip
+-DhelmDesignRule.config.DR-D1120-061=skip
+-DhelmDesignRule.config.DR-D1121-065=skip
+-DhelmDesignRule.config.DR-D1123-133=skip
+-DhelmDesignRule.config.eric-bos-assurance-topology-notification.DR-D1126-005=skip
+-DhelmDesignRule.config.eric-bos-assurance-topology-notification.DR-D1120-060=skip

@@ -1,0 +1,37 @@
+{{- if and (.Values.ingress.enabled) (.Values.ingress.iccr.enabled) -}}
+apiVersion: projectcontour.io/v1
+kind: HTTPProxy
+metadata:
+  name: {{ template "eric-service-assurance.name" . }}-ingress-iccr
+  annotations:
+    {{- include "eric-service-assurance.helm-annotations" .| nindent 4 }}
+    kubernetes.io/ingress.class: {{ template "eric-service-assurance.ingressClass" . }}
+  labels:
+    {{- include "eric-service-assurance.labels" .| nindent 4 }}
+spec:
+  virtualhost:
+    {{- if .Values.ingress.allowOriginHosts }}
+    corsPolicy:
+      allowCredentials: true
+      allowMethods:
+      - GET
+      - POST
+      - OPTIONS
+      allowOrigin:
+      {{- range $hosts :=  .Values.ingress.allowOriginHosts }}
+        - {{ $hosts| squote }}
+      {{- end }}
+      allowPrivateNetwork: true
+      exposeHeaders:
+      - Content-Length
+      - Content-Range
+      maxAge: 10m
+    {{- end }}
+    fqdn: {{ template "eric-service-assurance.fqdn" . }}
+    tls:
+      passthrough: {{ .Values.ingress.tls.passthrough }}
+      secretName: {{ required "A valid .Values.ingress.tls.secretName entry required" .Values.ingress.tls.secretName }}
+  includes:
+    - name: {{ template "eric-service-assurance.name" . }}-httpproxy
+    - name: eric-bss-bam-authn-proxy
+{{- end }}
